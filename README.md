@@ -1,73 +1,45 @@
-# React + TypeScript + Vite
+# OpsTwin Control Tower
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Professional static SPA that simulates enterprise operations under disruption.
 
-Currently, two official plugins are available:
+Live site after Pages deployment:
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- https://haloxd1.github.io/ops-twin-control-tower/
 
-## React Compiler
+## What It Proves
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- Business systems modeling beyond normal dashboards.
+- Deterministic operations simulation across suppliers, warehouses, lanes, products, customers, cash, and risk.
+- Decision-support UI with disruption scenarios, response playbooks, Monte Carlo comparison, SQL analysis, and postmortems.
+- Modern frontend engineering with React, TypeScript, Vite, Tailwind, Zustand, D3, React Flow, DuckDB-Wasm, Vitest, and Playwright.
 
-## Expanding the ESLint configuration
+## Main Routes
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- `/` command center
+- `/scenario` scenario builder
+- `/network` supplier and warehouse graph
+- `/analytics` KPI trends and Monte Carlo worker
+- `/sql` in-browser DuckDB lab
+- `/postmortem` generated recovery report
+- `/about` recruiter case study
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Local Run
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Verification
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm run lint
+npm run typecheck
+npm run test
+npm run build
+npm run test:e2e
 ```
+
+## Safety
+
+Uses synthetic data only. No secrets, APIs, backend, or real company data.
