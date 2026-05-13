@@ -1,5 +1,5 @@
 import { PageShell } from '../app/AppShell'
-import { defaultDecisionActions, defaultScenarioEvents, operationsNetwork } from '../data/network'
+import { operationsNetwork } from '../data/network'
 import { formatNumber } from '../domain/format'
 import type { DecisionActionType, ScenarioEventType } from '../domain/types'
 import { createDecisionAction } from '../engine/decisions'

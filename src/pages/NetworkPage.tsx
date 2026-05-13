@@ -31,7 +31,7 @@ export function NetworkPage() {
   const laneEdges: Edge[] = operationsNetwork.lanes.map((lane) => ({
     id: lane.id,
     animated: lane.reliability < 0.88,
-    data: lane,
+    data: { mode: lane.mode },
     label: `${lane.mode} | ${formatNumber(lane.reliability * 100)}%`,
     source: lane.from,
     target: lane.to,
