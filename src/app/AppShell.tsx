@@ -64,6 +64,12 @@ export function AppShell() {
       <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         <Outlet />
       </main>
+
+      <footer className="mx-auto max-w-7xl px-4 pb-8 pt-4 text-sm text-[#66756b] sm:px-6 lg:px-8">
+        <div className="rounded-md border border-[#13201b]/10 bg-white px-4 py-3">
+          Synthetic data only. Built as a static professional SPA for operations, data, BI, and business systems roles.
+        </div>
+      </footer>
     </div>
   )
 }

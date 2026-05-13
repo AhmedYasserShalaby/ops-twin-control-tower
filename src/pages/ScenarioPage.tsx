@@ -34,6 +34,7 @@ export function ScenarioPage() {
             {scenarioButtons.map((item, index) => (
               <button
                 key={item.type}
+                aria-label={`Add scenario: ${item.label}`}
                 type="button"
                 className="focus-ring rounded-md border border-[#13201b]/10 bg-[#fbfcf8] p-4 text-left hover:border-[#009b77]"
                 onClick={() => addEvent(createScenarioEvent(item.type, 4 + index * 3, 0.26 + index * 0.04, item.targetId))}
@@ -93,7 +94,12 @@ export function ScenarioPage() {
                     <strong>{event.name}</strong>
                     <p className="mt-1 text-sm text-[#5d6b63]">{event.description}</p>
                   </div>
-                  <button type="button" className="focus-ring rounded-md px-2 py-1 text-sm font-semibold text-[#a33820]" onClick={() => removeEvent(event.id)}>
+                  <button
+                    type="button"
+                    aria-label={`Remove event ${event.name}`}
+                    className="focus-ring rounded-md px-2 py-1 text-sm font-semibold text-[#a33820]"
+                    onClick={() => removeEvent(event.id)}
+                  >
                     Remove
                   </button>
                 </div>
@@ -115,7 +121,12 @@ export function ScenarioPage() {
                     <strong>{decision.name}</strong>
                     <p className="mt-1 text-sm text-[#5d6b63]">{decision.description}</p>
                   </div>
-                  <button type="button" className="focus-ring rounded-md px-2 py-1 text-sm font-semibold text-[#a33820]" onClick={() => removeDecision(decision.id)}>
+                  <button
+                    type="button"
+                    aria-label={`Remove decision ${decision.name}`}
+                    className="focus-ring rounded-md px-2 py-1 text-sm font-semibold text-[#a33820]"
+                    onClick={() => removeDecision(decision.id)}
+                  >
                     Remove
                   </button>
                 </div>

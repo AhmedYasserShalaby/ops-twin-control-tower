@@ -63,6 +63,7 @@ export function SqlLabPage() {
           />
           <button
             type="button"
+            aria-label="Run SQL query"
             className="focus-ring mt-3 rounded-md bg-[#13201b] px-4 py-2 text-sm font-semibold text-white disabled:opacity-60"
             disabled={loading}
             onClick={() => void executeQuery()}

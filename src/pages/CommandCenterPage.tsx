@@ -36,6 +36,7 @@ export function CommandCenterPage() {
                 <h3 className="mt-1 text-xl font-semibold">{topRecommendation.action.name}</h3>
                 <p className="mt-2 text-sm text-[#526157]">{topRecommendation.rationale}</p>
                 <button
+                  aria-label={`Apply advisor recommendation: ${topRecommendation.action.name}`}
                   type="button"
                   className="focus-ring mt-4 rounded-md bg-[#13201b] px-4 py-2 text-sm font-semibold text-white"
                   onClick={() => addDecision(topRecommendation.action)}
