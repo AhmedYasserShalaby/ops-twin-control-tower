@@ -8,6 +8,8 @@ Live site after Pages deployment:
 
 ## What It Proves
 
+![OpsTwin command center](docs/public-command-center.png)
+
 - Business systems modeling beyond normal dashboards.
 - Deterministic operations simulation across suppliers, warehouses, lanes, products, customers, cash, and risk.
 - Decision-support UI with disruption scenarios, response playbooks, Monte Carlo comparison, SQL analysis, and postmortems.
