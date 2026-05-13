@@ -8,6 +8,7 @@ export default defineConfig({
   base: '/ops-twin-control-tower/',
   plugins: [react(), tailwindcss()],
   test: {
+    include: ['src/**/*.test.ts', 'src/**/*.test.tsx'],
     browser: {
       enabled: false,
       headless: true,
