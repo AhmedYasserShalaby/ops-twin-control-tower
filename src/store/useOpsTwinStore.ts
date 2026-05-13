@@ -1,7 +1,6 @@
 import { create } from 'zustand'
 import { defaultDecisionActions, defaultScenarioEvents } from '../data/network'
 import type { DecisionAction, MonteCarloResult, ScenarioEvent, SimulationRun } from '../domain/types'
-import { rankRecommendations } from '../engine/advisor'
 import { mergeDecision } from '../engine/policy'
 import { runMonteCarloInWorker } from '../engine/monteCarlo'
 import { runSimulation } from '../engine/simulation'
@@ -58,9 +57,3 @@ export const useOpsTwinStore = create<OpsTwinState>((set, get) => ({
     set({ monteCarlo, runningMonteCarlo: false })
   },
 }))
-
-export function useAdvisorRecommendations() {
-  return useOpsTwinStore((state) =>
-    rankRecommendations({ decisions: state.decisions, events: state.events }, state.run),
-  )
-}

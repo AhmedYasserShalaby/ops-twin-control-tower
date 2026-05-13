@@ -2,13 +2,20 @@ import { PageShell } from '../app/AppShell'
 import { KpiCard } from '../components/KpiCard'
 import { TrendChart } from '../components/TrendChart'
 import { formatCurrency, formatNumber, formatPercent } from '../domain/format'
-import { useAdvisorRecommendations, useOpsTwinStore } from '../store/useOpsTwinStore'
+import { rankRecommendations } from '../engine/advisor'
+import { useOpsTwinStore } from '../store/useOpsTwinStore'
 import { AlertTriangle, Banknote, Boxes, Gauge, ShieldAlert, Sparkles } from 'lucide-react'
+import { useMemo } from 'react'
 
 export function CommandCenterPage() {
   const run = useOpsTwinStore((state) => state.run)
+  const decisions = useOpsTwinStore((state) => state.decisions)
+  const events = useOpsTwinStore((state) => state.events)
   const addDecision = useOpsTwinStore((state) => state.addDecision)
-  const recommendations = useAdvisorRecommendations()
+  const recommendations = useMemo(
+    () => rankRecommendations({ decisions, events }, run),
+    [decisions, events, run],
+  )
   const topRecommendation = recommendations[0]
   const finalWeek = run.weeks.at(-1)
 
