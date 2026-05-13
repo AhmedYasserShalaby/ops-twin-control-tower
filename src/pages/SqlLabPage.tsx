@@ -1,6 +1,6 @@
 import { PageShell } from '../app/AppShell'
 import { useState } from 'react'
-import { presetQueries, querySimulation } from '../engine/duckdb'
+import { presetQueries } from '../engine/sqlPresets'
 import { useOpsTwinStore } from '../store/useOpsTwinStore'
 
 export function SqlLabPage() {
@@ -14,6 +14,7 @@ export function SqlLabPage() {
     setLoading(true)
     setError('')
     try {
+      const { querySimulation } = await import('../engine/duckdb')
       const result = await querySimulation(run, nextSql)
       setRows(result)
     } catch (queryError) {
