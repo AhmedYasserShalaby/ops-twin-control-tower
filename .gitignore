@@ -24,3 +24,6 @@ test-results
 *.njsproj
 *.sln
 *.sw?
+
+# Internal deployment notes kept local only.
+docs/deployment.md
