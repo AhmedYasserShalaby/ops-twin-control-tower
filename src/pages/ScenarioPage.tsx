@@ -89,13 +89,12 @@ export function ScenarioPage() {
   const reset = useOpsTwinStore((state) => state.reset)
 
   return (
-    <PageShell eyebrow="What-if Studio" title="Scenario builder">
-      {/* Visual Timeline */}
+    <PageShell eyebrow="Plan changes" title="Scenario builder">
       <section className="control-surface rounded-xl p-5">
         <div className="flex items-center justify-between gap-3 mb-4">
           <div>
-            <p className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--text-muted)]">26-week timeline</p>
-            <h2 className="text-lg font-bold">Active events & decisions</h2>
+            <p className="text-xs font-bold uppercase text-[var(--text-muted)]">26-week timeline</p>
+            <h2 className="text-lg font-bold">Events and responses</h2>
           </div>
           <button type="button" className="btn-secondary" onClick={reset}>
             <RotateCcw size={14} />
@@ -105,14 +104,12 @@ export function ScenarioPage() {
 
         {/* Timeline bar */}
         <div className="relative mt-2">
-          {/* Week markers */}
           <div className="flex justify-between text-[0.625rem] text-[var(--text-muted)] mb-1 px-0.5">
             {[1, 5, 10, 15, 20, 26].map((w) => (
               <span key={w}>W{w}</span>
             ))}
           </div>
           <div className="relative h-10 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border-subtle)] overflow-hidden">
-            {/* Event blocks */}
             {events.map((event) => {
               const left = ((event.week - 1) / 25) * 100
               const width = (event.durationWeeks / 25) * 100
@@ -129,7 +126,6 @@ export function ScenarioPage() {
                 />
               )
             })}
-            {/* Decision blocks */}
             {decisions.map((d) => {
               const left = ((d.week - 1) / 25) * 100
               return (
@@ -152,15 +148,14 @@ export function ScenarioPage() {
         </div>
       </section>
 
-      {/* Scenario & Decision buttons */}
       <section className="grid gap-5 lg:grid-cols-[0.95fr_1.05fr]">
         <div className="control-surface rounded-xl p-5">
           <div className="flex items-center gap-2 mb-1">
             <CloudLightning size={16} className="text-[var(--accent-amber)]" />
-            <p className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--text-muted)]">Stress events</p>
+            <p className="text-xs font-bold uppercase text-[var(--text-muted)]">Disruptions</p>
           </div>
-          <h2 className="text-lg font-bold">Trigger disruptions</h2>
-          <p className="mt-1 text-sm text-[var(--text-muted)]">Click to add a disruption event into the simulation</p>
+          <h2 className="text-lg font-bold">Add a problem</h2>
+          <p className="mt-1 text-sm text-[var(--text-muted)]">Pick one event to stress the model.</p>
 
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             {scenarioButtons.map((item, index) => {
@@ -192,10 +187,10 @@ export function ScenarioPage() {
         <div className="control-surface rounded-xl p-5">
           <div className="flex items-center gap-2 mb-1">
             <Zap size={16} className="text-[var(--accent-teal)]" />
-            <p className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--text-muted)]">Response playbooks</p>
+            <p className="text-xs font-bold uppercase text-[var(--text-muted)]">Responses</p>
           </div>
-          <h2 className="text-lg font-bold">Apply decisions</h2>
-          <p className="mt-1 text-sm text-[var(--text-muted)]">Counter disruptions with strategic responses</p>
+          <h2 className="text-lg font-bold">Add a response</h2>
+          <p className="mt-1 text-sm text-[var(--text-muted)]">Choose how the operation should react.</p>
 
           <div className="mt-4 space-y-3">
             {decisionPlaybook.map((item) => {
@@ -232,7 +227,6 @@ export function ScenarioPage() {
         </div>
       </section>
 
-      {/* Active logs */}
       <section className="grid gap-5 lg:grid-cols-2">
         <div className="control-surface rounded-xl p-5">
           <h2 className="text-lg font-bold">Active disruptions</h2>
@@ -249,7 +243,7 @@ export function ScenarioPage() {
                   <button
                     type="button"
                     aria-label={`Remove event ${event.name}`}
-                    className="btn-danger opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
+                    className="btn-danger shrink-0"
                     onClick={() => removeEvent(event.id)}
                   >
                     <X size={12} />
@@ -281,7 +275,7 @@ export function ScenarioPage() {
                   <button
                     type="button"
                     aria-label={`Remove decision ${decision.name}`}
-                    className="btn-danger opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
+                    className="btn-danger shrink-0"
                     onClick={() => removeDecision(decision.id)}
                   >
                     <X size={12} />
@@ -298,7 +292,6 @@ export function ScenarioPage() {
         </div>
       </section>
 
-      {/* Network scope */}
       <section className="control-surface rounded-xl p-5">
         <h2 className="text-lg font-bold">Synthetic network scope</h2>
         <div className="mt-3 flex flex-wrap gap-3">

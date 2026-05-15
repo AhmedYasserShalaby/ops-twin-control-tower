@@ -14,7 +14,7 @@ interface TrendChartProps {
 export function TrendChart({
   data,
   metric,
-  stroke = '#00e5a0',
+  stroke = 'var(--accent-teal)',
   events,
   height: chartHeight = 220,
 }: TrendChartProps) {
@@ -63,7 +63,8 @@ export function TrendChart({
 
   return (
     <svg
-      className="h-full min-h-52 w-full"
+      className="w-full"
+      style={{ height }}
       viewBox={`0 0 ${width} ${height}`}
       role="img"
       aria-label={`${String(metric)} trend chart`}

@@ -1,4 +1,12 @@
-import { expect, test } from '@playwright/test'
+import { expect, test, type Page } from '@playwright/test'
+
+async function openNavLink(page: Page, name: RegExp) {
+  const link = page.getByRole('link', { name })
+  if (!(await link.isVisible().catch(() => false))) {
+    await page.getByRole('button', { name: /Toggle menu/i }).click()
+  }
+  await link.click()
+}
 
 test('runs the core recruiter journey', async ({ page }) => {
   const errors: string[] = []
@@ -8,19 +16,19 @@ test('runs the core recruiter journey', async ({ page }) => {
 
   await page.goto('/')
   await expect(page.getByRole('heading', { name: 'Command center' })).toBeVisible()
-  await page.getByRole('button', { name: /Apply advisor recommendation/i }).click()
+  await page.getByRole('button', { name: /Apply recommended action/i }).click()
 
-  await page.getByRole('link', { name: /Scenario/i }).click()
+  await openNavLink(page, /Scenario/i)
   await expect(page.getByRole('heading', { name: 'Scenario builder' })).toBeVisible()
   await page.getByRole('button', { name: /Add scenario: Supplier delay/i }).click()
 
-  await page.getByRole('link', { name: /Analytics/i }).click()
+  await openNavLink(page, /Analytics/i)
   await expect(page.getByRole('heading', { name: 'Analytics workbench' })).toBeVisible()
   await page.getByRole('button', { name: 'Run Monte Carlo' }).click()
   await expect(page.getByText('Median profit')).toBeVisible({ timeout: 10_000 })
 
-  await page.getByRole('link', { name: /Postmortem/i }).click()
-  await expect(page.getByRole('heading', { name: 'Generated recovery postmortem' })).toBeVisible()
+  await openNavLink(page, /Postmortem/i)
+  await expect(page.getByRole('heading', { name: 'Recovery postmortem', exact: true })).toBeVisible()
   await expect(page.getByText(/Root cause/i)).toBeVisible()
 
   expect(errors).toEqual([])
