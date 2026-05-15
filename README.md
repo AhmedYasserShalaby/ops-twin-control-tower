@@ -4,7 +4,7 @@ Professional static SPA that simulates enterprise operations under disruption.
 
 Live site after Pages deployment:
 
-- https://haloxd1.github.io/ops-twin-control-tower/
+- https://ahmedyassershalaby.github.io/ops-twin-control-tower/
 
 ## What It Proves
 

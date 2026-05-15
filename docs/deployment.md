@@ -4,7 +4,7 @@ OpsTwin is a static Vite app deployed through GitHub Pages.
 
 Expected public URL:
 
-- https://haloxd1.github.io/ops-twin-control-tower/
+- https://ahmedyassershalaby.github.io/ops-twin-control-tower/
 
 ## GitHub Pages
 
