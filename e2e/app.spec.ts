@@ -8,7 +8,7 @@ async function openNavLink(page: Page, name: RegExp) {
   await link.click()
 }
 
-test('runs the core recruiter journey', async ({ page }) => {
+test('runs the core product journey', async ({ page }) => {
   const errors: string[] = []
   page.on('console', (message) => {
     if (message.type() === 'error') errors.push(message.text())

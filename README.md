@@ -23,7 +23,7 @@ Live site after Pages deployment:
 - `/analytics` KPI trends and Monte Carlo worker
 - `/sql` in-browser DuckDB lab
 - `/postmortem` generated recovery report
-- `/about` recruiter case study
+- `/about` project case study
 
 ## Local Run
 

@@ -4,7 +4,7 @@ import { PageShell } from '../app/AppShell'
 
 export function AboutPage() {
   return (
-    <PageShell eyebrow="Recruiter brief" title="OpsTwin case study">
+    <PageShell eyebrow="Project brief" title="OpsTwin case study">
       <section className="dark-surface rounded-lg p-6 sm:p-8">
         <span className="badge badge-teal mb-3">Portfolio project</span>
         <h2 className="mt-2 max-w-4xl text-3xl font-bold leading-tight lg:text-4xl">
