@@ -9,6 +9,7 @@ interface TrendChartProps {
   stroke?: string
   events?: ScenarioEvent[]
   height?: number
+  baselineData?: WeeklyMetric[]
 }
 
 export function TrendChart({
@@ -17,18 +18,23 @@ export function TrendChart({
   stroke = 'var(--accent-teal)',
   events,
   height: chartHeight = 220,
+  baselineData,
 }: TrendChartProps) {
   const id = useId()
   const width = 720
   const height = chartHeight
   const [hoverIndex, setHoverIndex] = useState<number | null>(null)
 
-  const { min, max, xScale, yScale, linePath, areaPath } = useMemo(() => {
+  const { min, max, xScale, yScale, linePath, areaPath, baselineLinePath } = useMemo(() => {
     const vals = data.map((item) => Number(item[metric]))
-    const mn = Math.min(...vals)
-    const mx = Math.max(...vals)
+    const baseVals = baselineData ? baselineData.map((item) => Number(item[metric])) : []
+    const allVals = vals.length || baseVals.length ? [...vals, ...baseVals] : [0]
+    const mn = Math.min(...allVals)
+    const mx = Math.max(...allVals)
     const pad = (mx - mn) * 0.08 || 1
-    const xs = scaleLinear().domain([1, data.length]).range([40, width - 24])
+    
+    const maxWeeks = Math.max(data.length, baselineData?.length ?? 0) || 1
+    const xs = scaleLinear().domain([1, maxWeeks]).range([40, width - 24])
     const ys = scaleLinear().domain([mn - pad, mx + pad]).range([height - 30, 20])
 
     const lp = line<WeeklyMetric>()
@@ -42,8 +48,15 @@ export function TrendChart({
       .y1((item) => ys(Number(item[metric])))
       .curve(curveMonotoneX)(data)
 
-    return { min: mn, max: mx, xScale: xs, yScale: ys, linePath: lp, areaPath: ap }
-  }, [data, metric, width, height])
+    const blp = baselineData
+      ? line<WeeklyMetric>()
+          .x((item) => xs(item.week))
+          .y((item) => ys(Number(item[metric])))
+          .curve(curveMonotoneX)(baselineData)
+      : null
+
+    return { min: mn, max: mx, xScale: xs, yScale: ys, linePath: lp, areaPath: ap, baselineLinePath: blp }
+  }, [data, baselineData, metric, width, height])
 
   const formatValue = (v: number) => {
     if (metric === 'profit' || metric === 'revenue' || metric === 'cashBalance' || metric === 'grossMargin' || metric === 'holdingCost' || metric === 'expediteCost' || metric === 'operatingCost' || metric === 'inventoryValue') {
@@ -119,6 +132,19 @@ export function TrendChart({
       {/* Area fill */}
       <path d={areaPath ?? ''} fill={`url(#trend-grad-${id})`} className="animate-fade-in" />
 
+      {/* Baseline Line */}
+      {baselineLinePath && (
+        <path
+          d={baselineLinePath}
+          fill="none"
+          stroke="var(--text-muted)"
+          strokeLinecap="round"
+          strokeWidth="2"
+          strokeDasharray="4 4"
+          opacity={0.6}
+        />
+      )}
+
       {/* Line */}
       <path
         d={linePath ?? ''}
@@ -153,16 +179,25 @@ export function TrendChart({
         const y = yScale(Number(item[metric]))
         const val = Number(item[metric])
 
+        const baseItem = baselineData?.[hoverIndex]
+        const baseVal = baseItem ? Number(baseItem[metric]) : null
+
         return (
           <g>
             <line x1={x} x2={x} y1={20} y2={height - 30} stroke="var(--text-muted)" strokeWidth="1" strokeDasharray="3 3" opacity={0.5} />
             <circle cx={x} cy={y} r={5} fill={stroke} stroke="var(--bg-surface)" strokeWidth="2" />
+            {baseVal !== null && baseItem && (
+              <circle cx={x} cy={yScale(baseVal)} r={4} fill="var(--text-muted)" stroke="var(--bg-surface)" strokeWidth="1.5" />
+            )}
 
             {/* Tooltip box */}
-            <g transform={`translate(${x < width / 2 ? x + 10 : x - 130}, ${Math.max(y - 40, 10)})`}>
-              <rect width="120" height="44" rx="8" fill="var(--bg-elevated)" stroke="var(--border-default)" strokeWidth="1" />
+            <g transform={`translate(${x < width / 2 ? x + 10 : x - 150}, ${Math.max(y - 50, 10)})`}>
+              <rect width="140" height={baseVal !== null ? "58" : "44"} rx="8" fill="var(--bg-elevated)" stroke="var(--border-default)" strokeWidth="1" />
               <text x="10" y="18" fill="var(--text-muted)" fontSize="10" fontWeight="600">Week {item.week}</text>
-              <text x="10" y="34" fill="var(--text-primary)" fontSize="13" fontWeight="700">{formatValue(val)}</text>
+              <text x="10" y="34" fill={stroke} fontSize="12" fontWeight="700">Active: {formatValue(val)}</text>
+              {baseVal !== null && (
+                <text x="10" y="48" fill="var(--text-secondary)" fontSize="11" fontWeight="500">Baseline: {formatValue(baseVal)}</text>
+              )}
             </g>
           </g>
         )

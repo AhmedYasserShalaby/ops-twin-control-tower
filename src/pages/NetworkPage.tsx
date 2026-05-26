@@ -3,42 +3,74 @@ import { operationsNetwork } from '../data/network'
 import { formatNumber } from '../domain/format'
 import { ReactFlow, Background, Controls, type Edge, type Node } from '@xyflow/react'
 import { useState } from 'react'
+import { useOpsTwinStore } from '../store/useOpsTwinStore'
 
 export function NetworkPage() {
   const [selected, setSelected] = useState<string | null>(null)
+  
+  // Connect to live simulation state
+  const isPlaying = useOpsTwinStore((state) => state.isPlaying)
+  const currentPlayWeek = useOpsTwinStore((state) => state.currentPlayWeek)
+  const activeEvents = useOpsTwinStore((state) => 
+    state.events.filter(e => currentPlayWeek >= e.week && currentPlayWeek < e.week + e.durationWeeks)
+  )
 
   const nodes: Node[] = [
-    ...operationsNetwork.suppliers.map((s, i) => ({
-      id: s.id,
-      data: { label: `${s.name}\n${s.region}` },
-      position: { x: 0, y: i * 120 },
-      style: nodeStyle('#00e5a0'),
-      type: 'default' as const,
-    })),
-    ...operationsNetwork.warehouses.map((w, i) => ({
-      id: w.id,
-      data: { label: `${w.name}\n${w.region}` },
-      position: { x: 400, y: i * 150 + 30 },
-      style: nodeStyle('#3b82f6'),
-      type: 'default' as const,
-    })),
+    ...operationsNetwork.suppliers.map((s, i) => {
+      const isDelayed = activeEvents.some(e => e.type === 'supplier_delay' && e.targetId === s.id)
+      const accentColor = isDelayed ? 'var(--accent-red)' : '#00e5a0'
+      const label = isDelayed ? `⚠️ [DELAYED]\n${s.name}` : `${s.name}\n${s.region}`
+      return {
+        id: s.id,
+        data: { label },
+        position: { x: 0, y: i * 120 },
+        style: nodeStyle(accentColor, isDelayed),
+        type: 'default' as const,
+      }
+    }),
+    ...operationsNetwork.warehouses.map((w, i) => {
+      const isPressured = activeEvents.some(e => e.type === 'warehouse_capacity' && e.targetId === w.id)
+      const accentColor = isPressured ? 'var(--accent-amber)' : '#3b82f6'
+      const label = isPressured ? `⚠️ [CAPACITY]\n${w.name}` : `${w.name}\n${w.region}`
+      return {
+        id: w.id,
+        data: { label },
+        position: { x: 400, y: i * 150 + 30 },
+        style: nodeStyle(accentColor, isPressured),
+        type: 'default' as const,
+      }
+    }),
     ...operationsNetwork.customerRegions.map((c, i) => ({
       id: c.id,
       data: { label: c.name },
       position: { x: 800, y: i * 150 + 60 },
-      style: nodeStyle('#ffb547'),
+      style: nodeStyle('#ffb547', false),
       type: 'default' as const,
     })),
   ]
 
-  const laneEdges: Edge[] = operationsNetwork.lanes.map((lane) => ({
-    id: lane.id,
-    animated: lane.reliability < 0.88,
-    label: `${lane.mode} | ${formatNumber(lane.reliability * 100)}%`,
-    source: lane.from,
-    target: lane.to,
-    style: { stroke: lane.reliability < 0.88 ? '#ff5a5a' : '#00e5a0', strokeWidth: 2 },
-  }))
+  const laneEdges: Edge[] = operationsNetwork.lanes.map((lane) => {
+    const isDisrupted = activeEvents.some(
+      (e) => e.type === 'logistics_failure' && (e.targetId === lane.id || e.targetId === lane.from || e.targetId === lane.to)
+    )
+    const isSourceDelayed = activeEvents.some((e) => e.type === 'supplier_delay' && e.targetId === lane.from)
+    const isAlert = isDisrupted || isSourceDelayed
+    const stroke = isAlert ? 'var(--accent-red)' : '#00e5a0'
+    const animated = isPlaying && !isAlert
+
+    return {
+      id: lane.id,
+      animated: animated || isAlert,
+      label: `${lane.mode} | ${isAlert ? '⚠️ ALERT' : `${formatNumber(lane.reliability * 100)}%`}`,
+      source: lane.from,
+      target: lane.to,
+      style: { 
+        stroke, 
+        strokeWidth: isAlert ? 3 : 2,
+        strokeDasharray: isAlert ? '5 5' : undefined 
+      },
+    }
+  })
 
   const demandEdges: Edge[] = operationsNetwork.customerRegions.flatMap((c) =>
     operationsNetwork.warehouses.map((w) => ({
@@ -116,7 +148,7 @@ export function NetworkPage() {
           <span className="flex items-center gap-2"><span className="size-3 rounded-sm" style={{ background: '#3b82f6' }} /> Warehouses</span>
           <span className="flex items-center gap-2"><span className="size-3 rounded-sm" style={{ background: '#ffb547' }} /> Customers</span>
           <span className="flex items-center gap-2"><span className="w-5 h-0.5" style={{ background: '#00e5a0' }} /> Reliable lane</span>
-          <span className="flex items-center gap-2"><span className="w-5 h-0.5" style={{ background: '#ff5a5a' }} /> Risky lane (animated)</span>
+          <span className="flex items-center gap-2"><span className="w-5 h-0.5" style={{ background: '#ff5a5a' }} /> Disrupted / Alert lane</span>
         </div>
       </section>
 
@@ -156,10 +188,10 @@ export function NetworkPage() {
   )
 }
 
-function nodeStyle(accentColor: string) {
+function nodeStyle(accentColor: string, isAlert: boolean = false) {
   return {
-    background: 'var(--bg-elevated)',
-    border: `1.5px solid ${accentColor}40`,
+    background: isAlert ? 'var(--accent-red-dim)' : 'var(--bg-elevated)',
+    border: `1.5px solid ${isAlert ? 'var(--accent-red)' : accentColor + '40'}`,
     borderRadius: 10,
     color: 'var(--text-primary)',
     fontSize: 12,
@@ -167,5 +199,7 @@ function nodeStyle(accentColor: string) {
     padding: 14,
     whiteSpace: 'pre-line' as const,
     width: 180,
+    boxShadow: isAlert ? '0 0 12px rgba(182, 66, 52, 0.35)' : undefined,
   }
 }
+

@@ -5,7 +5,7 @@ import { useOpsTwinStore } from '../store/useOpsTwinStore'
 import { AnimatedNumber } from '../components/AnimatedNumber'
 import { useState } from 'react'
 import type { WeeklyMetric } from '../domain/types'
-import { Play, Loader2, ArrowUpDown } from 'lucide-react'
+import { Play, Loader2, ArrowUpDown, GitCompare, Trash2 } from 'lucide-react'
 
 const chartMetrics: Array<{ key: keyof WeeklyMetric; label: string; color: string }> = [
   { key: 'serviceLevel', label: 'Service Level', color: '#3b82f6' },
@@ -23,6 +23,12 @@ export function AnalyticsPage() {
   const monteCarlo = useOpsTwinStore((s) => s.monteCarlo)
   const runningMC = useOpsTwinStore((s) => s.runningMonteCarlo)
   const runMC = useOpsTwinStore((s) => s.runMonteCarlo)
+
+  // Compare store states
+  const baselineRun = useOpsTwinStore((s) => s.baselineRun)
+  const saveAsBaseline = useOpsTwinStore((s) => s.saveAsBaseline)
+  const clearBaseline = useOpsTwinStore((s) => s.clearBaseline)
+
   const [selected, setSelected] = useState<Array<keyof WeeklyMetric>>(['serviceLevel', 'riskScore'])
   const [sortKey, setSortKey] = useState<SortKey>('week')
   const [sortAsc, setSortAsc] = useState(true)
@@ -39,6 +45,50 @@ export function AnalyticsPage() {
 
   return (
     <PageShell eyebrow="Tradeoff Analysis" title="Analytics workbench">
+      
+      {/* Baseline Comparison Panel */}
+      <section className="control-surface rounded-xl p-5 flex flex-wrap items-center justify-between gap-4 animate-fade-in-up">
+        <div className="flex-1 min-w-[280px]">
+          <h2 className="text-lg font-bold flex items-center gap-2">
+            <GitCompare className="text-[var(--accent-teal)]" size={20} />
+            Scenario Comparison Workbench
+          </h2>
+          <p className="text-sm text-[var(--text-muted)] mt-1">
+            {baselineRun 
+              ? "Active baseline scenario locked. Dotted lines on charts reflect baseline performance."
+              : "Compare how different policy decisions and scenario events impact supply chain KPIs."}
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          {baselineRun ? (
+            <>
+              <button
+                type="button"
+                onClick={saveAsBaseline}
+                className="btn-secondary text-xs"
+              >
+                Overwrite Baseline
+              </button>
+              <button
+                type="button"
+                onClick={clearBaseline}
+                className="btn-danger flex items-center gap-1.5"
+              >
+                <Trash2 size={14} /> Clear
+              </button>
+            </>
+          ) : (
+            <button
+              type="button"
+              onClick={saveAsBaseline}
+              className="btn-primary flex items-center gap-2 text-xs"
+            >
+              <GitCompare size={16} /> Save Current as Baseline
+            </button>
+          )}
+        </div>
+      </section>
+
       <section className="control-surface rounded-xl p-5">
         <p className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--text-muted)] mb-3">Select metrics to chart</p>
         <div className="flex flex-wrap gap-2">
@@ -57,7 +107,7 @@ export function AnalyticsPage() {
           })}
         </div>
       </section>
-
+ 
       <section className="grid gap-5 lg:grid-cols-2">
         {selected.map((k) => {
           const m = chartMetrics.find(x => x.key === k)
@@ -65,7 +115,7 @@ export function AnalyticsPage() {
           return (
             <div key={k} className="control-surface rounded-xl p-5 animate-fade-in-up">
               <h2 className="text-lg font-bold mb-3"><span className="inline-block size-2.5 rounded-full mr-2" style={{ background: m.color }} />{m.label} trend</h2>
-              <TrendChart data={run.weeks} metric={k} stroke={m.color} events={events} />
+              <TrendChart data={run.weeks} metric={k} stroke={m.color} events={events} baselineData={baselineRun?.weeks} />
             </div>
           )
         })}
