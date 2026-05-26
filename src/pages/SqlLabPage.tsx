@@ -2,7 +2,7 @@ import { PageShell } from '../app/AppShell'
 import { useState } from 'react'
 import { presetQueries } from '../engine/sqlPresets'
 import { useOpsTwinStore } from '../store/useOpsTwinStore'
-import { Play, Loader2, Copy, Check, Database } from 'lucide-react'
+import { Play, Loader2, Copy, Check, Database, Sparkles } from 'lucide-react'
 
 export function SqlLabPage() {
   const run = useOpsTwinStore((s) => s.run)
@@ -11,6 +11,41 @@ export function SqlLabPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [copied, setCopied] = useState(false)
+
+  // AI SQL state variables
+  const [aiQuery, setAiQuery] = useState('')
+  const [aiGenerating, setAiGenerating] = useState(false)
+  const [aiError, setAiError] = useState('')
+
+  async function handleAiGenerate() {
+    if (!aiQuery.trim()) return
+    setAiGenerating(true)
+    setAiError('')
+    try {
+      const response = await fetch('http://localhost:8000/api/generate-sql', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ question: aiQuery }),
+      })
+
+      if (!response.ok) {
+        throw new Error('AI Server is currently offline.')
+      }
+
+      const data = await response.json()
+      if (data.sql) {
+        setSql(data.sql)
+        void executeQuery(data.sql)
+      }
+    } catch (err) {
+      console.error(err)
+      setAiError('Generation failed. Make sure the local python backend is running.')
+    } finally {
+      setAiGenerating(false)
+    }
+  }
 
   async function executeQuery(nextSql = sql) {
     setLoading(true); setError('')
@@ -32,6 +67,7 @@ export function SqlLabPage() {
   return (
     <PageShell eyebrow="Browser SQL" title="In-browser DuckDB lab">
       <section className="grid gap-5 lg:grid-cols-[0.8fr_1.2fr]">
+        {/* Left Panel: Preset Queries & Schema Explorer */}
         <div className="control-surface rounded-xl p-5 flex flex-col justify-between">
           <div>
             <h2 className="text-lg font-bold">Preset queries</h2>
@@ -99,8 +135,41 @@ export function SqlLabPage() {
           </div>
         </div>
 
+        {/* Right Panel: SQL Editor & AI SQL Generator */}
         <div className="control-surface rounded-xl p-5 flex flex-col justify-between">
           <div>
+            {/* AI SQL assistant widget */}
+            <div className="mb-4 border-b border-[var(--border-subtle)] pb-4">
+              <h3 className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--text-muted)] flex items-center gap-1.5 mb-2 select-none">
+                <Sparkles size={12} className="text-[var(--accent-teal)] animate-pulse" />
+                AI SQL Generator
+              </h3>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={aiQuery}
+                  onChange={(e) => setAiQuery(e.target.value)}
+                  placeholder="e.g. Find weeks with negative profit"
+                  className="focus-ring flex-1 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-base)] px-3 py-1.5 text-xs text-[var(--text-primary)]"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault()
+                      void handleAiGenerate()
+                    }
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={() => void handleAiGenerate()}
+                  disabled={aiGenerating || !aiQuery.trim()}
+                  className="btn-primary text-xs shrink-0 cursor-pointer h-[32px] px-3 font-semibold"
+                >
+                  {aiGenerating ? <Loader2 size={12} className="animate-spin" /> : 'Generate'}
+                </button>
+              </div>
+              {aiError && <p className="mt-1.5 text-[10px] text-[var(--accent-red)] font-medium">{aiError}</p>}
+            </div>
+
             <label className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--text-muted)]" htmlFor="sql-editor">SQL editor</label>
             <textarea id="sql-editor"
               className="focus-ring mt-2 min-h-44 w-full rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-base)] p-3 font-mono text-sm text-[var(--accent-teal)] placeholder:text-[var(--text-muted)]"

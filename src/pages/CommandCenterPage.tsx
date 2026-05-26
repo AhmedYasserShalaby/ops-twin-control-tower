@@ -46,34 +46,58 @@ export function CommandCenterPage() {
   }
 
   // AI chat question responses
-  const askCoPilot = (question: string) => {
+  const askCoPilot = async (question: string) => {
     setChatLog(prev => [...prev, { sender: 'user', text: question }])
     setIsTyping(true)
-    
-    setTimeout(() => {
-      let answer = ''
+
+    try {
+      const response = await fetch('http://localhost:8000/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          currentPlayWeek,
+          prompt: question,
+          metrics: run.weeks,
+          decisions: decisions,
+          events: events,
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Backend server returned an error.')
+      }
+
+      const data = await response.json()
+      setChatLog(prev => [...prev, { sender: 'ai', text: data.text }])
+    } catch (err) {
+      console.warn('Backend offline, falling back to local diagnostics engine:', err)
       
+      // Local rule-based fallback
+      let answer = ''
       if (question.includes('bottlenecks')) {
         const topFinding = run.findings.find(f => f.area === 'supplier' || f.area === 'inventory')
         const stockouts = run.summary.stockoutIncidents
-        answer = `Checking active runs: We have registered ${stockouts} stockout incidents. ${
+        answer = `[Offline Co-pilot] Telemetry audit: We have registered ${stockouts} stockout incidents. ${
           topFinding 
             ? `Our primary bottleneck is currently around the "${topFinding.title}" category triggered at Week ${topFinding.week}.` 
             : 'Operational inventory paths are stable. No heavy supplier bottlenecks flagged.'
         } I recommend diversifying high-risk suppliers under the scenarios tab.`
       } else if (question.includes('cash')) {
         const minCash = Math.min(...run.weeks.map(w => w.cashBalance))
-        answer = `Our minimum projected cash dip is ${formatCurrency(minCash)}. If cash reserves fall below $1.0M, we risk liquidity lock. Safety stock increases margin holding costs by ~0.2% per week. Expediting shipments is cash-heavy, costing 13% of product value. Consider demand shaping to preserve margins.`
+        answer = `[Offline Co-pilot] Cash audit: Our minimum projected cash dip is ${formatCurrency(minCash)}. If cash reserves fall below $1.0M, we risk liquidity lock. Safety stock increases margin holding costs by ~0.2% per week. Expediting shipments is cash-heavy, costing 13% of product value. Consider demand shaping to preserve margins.`
       } else if (question.includes('carbon')) {
         const totalCarbon = run.summary.carbonIndex
-        answer = `Our current average weekly Carbon Footprint index is ${totalCarbon.toFixed(1)}k CO2e. Expedited shipping is a primary driver of carbon spikes (representing 0.12 impact per unit). Inter-lane shipping via sea and rail routes is 4x cleaner than air freight. Recommend swapping priority lanes in policy.`
+        answer = `[Offline Co-pilot] Carbon audit: Our current average weekly Carbon Footprint index is ${totalCarbon.toFixed(1)}k CO2e. Expedited shipping is a primary driver of carbon spikes (representing 0.12 impact per unit). Inter-lane shipping via sea and rail routes is 4x cleaner than air freight. Recommend swapping priority lanes in policy.`
       } else {
-        answer = "I've reviewed the current 26-week control run. Service levels are running at " + run.summary.serviceLevel.toFixed(1) + "%. Adjust policies using the decision playbook or run Monte Carlo resilience tests to audit structural variance."
+        answer = `[Offline Co-pilot] I've reviewed the current 26-week control run. Service levels are running at ${run.summary.serviceLevel.toFixed(1)}%. Adjust policies using the decision playbook or run Monte Carlo resilience tests.`
       }
-
+      
       setChatLog(prev => [...prev, { sender: 'ai', text: answer }])
+    } finally {
       setIsTyping(false)
-    }, 750)
+    }
   }
 
   return (
